@@ -78,7 +78,6 @@ check_list_state[51] = True
 class Informe(ft.UserControl):
     def build(self):
         
-        self.n_informe = 1
         #CAMPOS DE TEXTO
         self.inst=self.input_text(label="Institución",text_default="BBRAUN MEDICAL PERU")
         self.serv=self.input_text(label="Servicio",text_default="STOCK")
@@ -154,6 +153,9 @@ class Informe(ft.UserControl):
             visible=False
         )
                         
+        self.input_n_informe = self.input_text(label="Nro. Informe",text_default=self.get_n_informe())
+        self.n_informe = int(self.input_n_informe.value)
+
         #COMPONENTES
 
         self.app_bar = ft.Row(
@@ -169,7 +171,7 @@ class Informe(ft.UserControl):
             controls=[
                 ft.Row(alignment="center",controls=[self.inst,self.serv,self.model]),
                 ft.Row(alignment="center",controls=[self.serie,self.qr,self.fecha]),
-                self.check_btns(0,2)
+                ft.Row(alignment = "center",controls = [self.check_btns(0,2),self.input_n_informe])
             ] 
         )
 
@@ -269,6 +271,21 @@ class Informe(ft.UserControl):
             
         )
     
+    @staticmethod
+    def get_n_informe():
+        # Leer desde un archivo
+        with open("data/ninforme.txt", "r") as archivo:
+            datos = archivo.read()
+            if datos!="":
+                return datos
+            else: return 1
+    
+    @staticmethod
+    def set_n_informe(n_informe):
+        with open("data/ninforme.txt", "w") as archivo:
+            archivo.write(n_informe)
+
+
     def verify_sq(self,e):
         if self.serie.value != "":
             self.btn_make_informe.disabled = False
@@ -289,8 +306,16 @@ class Informe(ft.UserControl):
 
 
     def launch_make_informe(self,e):
-        
+        self.n_informe = int(self.input_n_informe.value)
+        self.progreso.visible = True
+        self.pb.value = 0.5
+        self.pb_value.value = "50%"
+        super().update()
         self.make_informe(serie=self.serie.value,qr=self.qr.value)
+        self.set_n_informe(str(self.n_informe))
+        self.pb.value = 1
+        self.pb_value.value = "100%"
+        super().update()
 
     def make_informe(self,serie,qr):
         textos = [
@@ -315,20 +340,20 @@ class Informe(ft.UserControl):
         print(self.n_informe)
 
     def pick_files_result(self,e: ft.FilePickerResultEvent):
+        self.n_informe = int(self.input_n_informe.value)
         xls_file=e.files
         ruta = xls_file[0].path
         if not xls_file is None:
             self.file_selected.value = ruta
             self.serie.disabled = True
             self.qr.disabled = True
-            self.btn_make_informe.disabled = False
             super().update()
 
-            data = pd.read_excel(ruta)
-            # data ={
-            #     "SN":["1235468","15165","1235468","15165","1235468","15165","1235468","15165","1235468","15165","1235468","15165"],
-            #     "QR":["1551515","16515","1235468","15165","1235468","15165","1235468","15165","1235468","15165","1235468","15165"]
-            # }
+            #data = pd.read_excel(ruta)
+            data ={
+                "SN":["1235468","15165","54545","558625","586858","8955558","585858","58586","68698","58585","458585","474747"],
+                "QR":["1551515","16515","1235468","15165","1235468","15165","1235468","15165","1235468","15165","1235468","15165"]
+            }
 
             self.progreso.visible = True
 
@@ -338,6 +363,10 @@ class Informe(ft.UserControl):
                 self.pb.value = valor
                 self.pb_value.value = f"{round(valor,2)*100}%"
                 super().update()
+            
+            self.set_n_informe(str(self.n_informe))
+            self.input_n_informe.value = int(self.n_informe)
+            super().update()
 
         else:
             self.dlg_modal.open = True

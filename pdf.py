@@ -23,7 +23,7 @@ def make_pdf(textos,checks,n_informe=1):
             cv2.putText(img, "X", ubicacion, font, 2, (255,0,0), 3, cv2.LINE_AA)
 
     #Guardar imagen
-    cv2.imwrite(f'informes/informe_{n_informe}.jpg', img)
+    cv2.imwrite(f'informes/informe_{textos[3]}.jpg', img)
 
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL
 date = str(datetime.date.today())
